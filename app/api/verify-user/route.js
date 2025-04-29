@@ -1,6 +1,7 @@
 import { db } from "@/config/db";
 import { usersTable } from "@/config/schema";
 import { eq } from "drizzle-orm";
+
 import { NextResponse } from "next/server";
 
 export async function POST(req, res) {
@@ -14,27 +15,30 @@ export async function POST(req, res) {
       .where(eq(usersTable.email, user.primaryEmailAddress.emailAddress));
 
     if (userExists.length == 0) {
-
       // insert user if user is not register
-      const createUser = await db.insert(usersTable).values({
-        name: user.fullName,
-        email: user.primaryEmailAddress.emailAddress,
-        imageUrl: user.imageUrl
-      });
-
-      console.log("Create User",createUser);
-      
+      const createUser = await db
+        .insert(usersTable)
+        .values({
+          name: user.fullName,
+          email: user.primaryEmailAddress.emailAddress,
+          imageUrl: user.imageUrl
+        })
+        .returning({ usersTable });
 
       return NextResponse.json({
         success: true,
-        msg: "User login successfully"
+        msg: "User login successfully",
+        user: createUser[0].usersTable
+
       });
+
     }
 
     return NextResponse.json({
       success: true,
-      user: user
+      user: userExists[0]
     });
+
 
   } catch (error) {
     const errMessage = error.message;

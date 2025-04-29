@@ -3,22 +3,38 @@
 
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+
+export const UserContext = createContext({});
+
+export const useUserContext = () => {
+  const {userDetails,setUserDetails} = useContext(UserContext);  
+  return {userDetails,setUserDetails};
+};
 
 const Provider = ({ children }) => {
   const { user } = useUser();
+  const [userDetails, setUserDetails] = useState();
+
 
   useEffect(() => {
-    user&&callUser();
+    user && callUser();
   }, [user]);
 
   const callUser = async () => {
-    const response = await axios.post(`/api/verify-user`,{user})
-    console.log(response.data);
-    
+    try {
+      const response = await axios.post(`/api/verify-user`, { user });
+      setUserDetails(response.data?.user);
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
-  return <>{ children }</>;
+  return (
+    <UserContext.Provider value={{ userDetails, setUserDetails }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
 
 export default Provider;

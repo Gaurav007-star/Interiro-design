@@ -4,7 +4,7 @@ import React from "react";
 
 const Dashboard = () => {
   return (
-    <div className="w-screen h-max flex flex-col items-center">
+    <div className="w-screen h-max flex flex-col items-center ">
       <Designs />
     </div>
   );
